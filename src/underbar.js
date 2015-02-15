@@ -157,7 +157,7 @@
   // to reduce. If no starting value is passed, the first element is used as
   // the accumulator, and is never passed to the iterator. In other words, in
   // the case where a starting value is not passed, the iterator is not invoked
-  // until the second element, with the first element as it's second argument.
+  // until the second element, with the first element as its second argument.
   //  
   // Example:
   //   var numbers = [1,2,3];
@@ -170,9 +170,17 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
-    if (accumulator === undefined) {
-      accumulator = 0;
+    if (accumulator !== undefined) {
+      _.each(collection, function(item) {
+        accumulator = iterator(accumulator, item);
+      });
+    } else {
+      accumulator = _.first(collection);
+      for (var i = 1; i < collection.length; i++) {
+        accumulator = iterator(accumulator, collection[i]);
+      }
     }
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
