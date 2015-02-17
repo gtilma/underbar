@@ -57,9 +57,8 @@
     } else if (typeof collection === 'object') {
       for (var item in collection) {
         iterator(collection[item], item, collection);
-      }      
+      }
     }
-    
   };
 
   // Returns the index at which value can be found in the array, or -1 if value
@@ -106,12 +105,12 @@
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
     var result = [];
-    
-    for (var i = 0; i < array.length; i++) {
-      if (_.indexOf(result, array[i]) < 0) {
-        result.push(array[i]);
+
+    _.each(array, function(item) {
+      if (_.indexOf(result, item) < 0) {
+        result.push(item);
       }
-    }
+    });
 
     return result;
   };
@@ -152,25 +151,25 @@
   // Reduces an array or object to a single value by repetitively calling
   // iterator(accumulator, item) for each item. accumulator should be
   // the return value of the previous iterator call.
-  //  
+  //
   // You can pass in a starting value for the accumulator as the third argument
   // to reduce. If no starting value is passed, the first element is used as
   // the accumulator, and is never passed to the iterator. In other words, in
   // the case where a starting value is not passed, the iterator is not invoked
   // until the second element, with the first element as its second argument.
-  //  
+  //
   // Example:
   //   var numbers = [1,2,3];
   //   var sum = _.reduce(numbers, function(total, number){
   //     return total + number;
   //   }, 0); // should be 6
-  //  
+  //
   //   var identity = _.reduce([5], function(total, number){
   //     return total + number * number;
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
-    if (accumulator !== undefined) {
+    if (accumulator !== undefined) { // could also use (arguments.length < 3)
       _.each(collection, function(item) {
         accumulator = iterator(accumulator, item);
       });
@@ -199,6 +198,15 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    if (collection.length === 0 || collection.length === undefined) {
+      return true;
+    }
+    return _.reduce(collection, function(item) {
+      // if (item) {
+      //   return true;
+      // }
+      return iterator(item);
+    }, false);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
@@ -227,11 +235,27 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    for (var i = 1; i < arguments.length; i++) {
+      var obj2 = arguments[i];
+      for (var item in obj2) {
+        obj[item] = obj2[item];
+      }
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    for (var i = 1; i < arguments.length; i++) {
+      var obj2 = arguments[i];
+      for (var item in obj2) {
+        if (!obj.hasOwnProperty(item)) {
+          obj[item] = obj2[item];
+        }
+      }
+    }
+    return obj;
   };
 
 
@@ -257,7 +281,7 @@
     return function() {
       if (!alreadyCalled) {
         // TIP: .apply(this, arguments) is the standard way to pass on all of the
-        // infromation from one function call to another.
+        // information from one function call to another.
         result = func.apply(this, arguments);
         alreadyCalled = true;
       }
@@ -284,6 +308,10 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    return setInterval(function() {
+      return func.apply(this, args);
+    }, wait);
   };
 
 
@@ -298,6 +326,16 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var shuffle = array.slice();
+    var len = shuffle.length;
+    var randomIndex = 0, x;
+    for (var i = 0; i < len; i++) {
+      randomIndex = Math.floor(Math.random() * len);
+      x = shuffle[i];
+      shuffle[i] = shuffle[randomIndex];
+      shuffle[randomIndex] = x;
+    }
+    return shuffle;
   };
 
 
