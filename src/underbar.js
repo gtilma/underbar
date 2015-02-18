@@ -201,18 +201,24 @@
     if (collection.length === 0 || collection.length === undefined) {
       return true;
     }
-    return _.reduce(collection, function(item) {
-      // if (item) {
-      //   return true;
-      // }
-      return iterator(item);
-    }, false);
+    if (iterator === undefined) {
+      iterator = _.identity;
+    }
+    return _.reduce(collection, function(allFound, item) {
+      return Boolean(iterator(item)) && allFound;
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    if (iterator === undefined) {
+      iterator = _.identity;
+    }
+    return !(_.every(collection, function(item) {
+      return !iterator(item);
+    }));
   };
 
 
@@ -299,6 +305,18 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var result = {};
+
+    return function() {
+      var args = JSON.stringify(arguments);
+
+      if (result[args]) {
+        return result[args];
+      } else {
+        result[args] = func.apply(this, arguments);
+        return result[args];
+      }
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
